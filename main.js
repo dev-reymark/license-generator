@@ -13,7 +13,6 @@ function createWindow() {
     },
   });
 
-  // Load your PHP server output in the Electron window
   win.loadURL("http://127.0.0.1:8000");
 }
 

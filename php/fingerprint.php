@@ -1,5 +1,5 @@
 <?php
-// Optional: fingerprint-web.php
+
 function normalize($str)
 {
     return strtolower(trim(preg_replace('/[[:^print:]]/', '', $str)));

@@ -44,10 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $encrypted = openssl_encrypt($json, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
     $encoded = base64_encode($encrypted);
 
-    // Save to file (optional)
     file_put_contents(__DIR__ . '/license.key', $encoded);
 
-    // Pass license to frontend
     $_SESSION['license'] = $encoded;
     header('Location: index.php?success=1');
     exit;
