@@ -42,7 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $iv = substr(hash('sha256', $fingerprint['machine_uuid'], true), 0, 16);
     $json = json_encode($fingerprint, JSON_UNESCAPED_SLASHES);
     $encrypted = openssl_encrypt($json, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
-    $encoded = base64_encode($encrypted);
+
+    // ✅ Prepend IV before base64
+    $encoded = base64_encode($iv . $encrypted);
 
     file_put_contents(__DIR__ . '/license.key', $encoded);
 
