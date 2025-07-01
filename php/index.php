@@ -239,6 +239,15 @@
                 </svg>
                 Auto-Fetch Fingerprint
             </button>
+            <form id="decryptForm">
+                <div class="form-group">
+                    <label for="encFile">Upload Encrypted Fingerprint (.enc)</label>
+                    <input type="file" id="encFile" accept=".enc,.txt" required>
+                </div>
+                <button type="submit" class="btn btn-outline">
+                    🔓 Decrypt & Load Fingerprint
+                </button>
+            </form>
             <div id="loading" class="loading">
                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -251,12 +260,18 @@
                     <label for="fingerprint">Fingerprint JSON</label>
                     <textarea name="fingerprint" id="fingerprint" rows="6" required placeholder="Paste fingerprint JSON or use auto-fetch above"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
-                    </svg>
-                    Generate License
-                </button>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+                        </svg>
+                        Generate License
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="resetForm()">
+                        ♻️ Reset
+                    </button>
+                </div>
             </form>
 
             <div id="alertContainer">
@@ -366,6 +381,52 @@
                 url.search = '';
                 window.history.replaceState({}, document.title, url.toString());
             }, 5000);
+        }
+    </script>
+    
+    <script>
+        document.getElementById('decryptForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('encFile');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('encFile', file);
+
+            fetch('decrypt.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        showAlert(data.error, 'error');
+                    } else {
+                        document.getElementById('fingerprint').value = JSON.stringify(data, null, 2);
+                        showAlert('Encrypted fingerprint decrypted successfully!', 'success');
+                    }
+                })
+                .catch(() => showAlert('Error decrypting fingerprint.', 'error'));
+        });
+    </script>
+
+    <script>
+        function resetForm() {
+            document.getElementById('encFile').value = "";
+            document.getElementById('fingerprint').value = "";
+
+            const qrcodeContainer = document.getElementById('qrcode');
+            if (qrcodeContainer) qrcodeContainer.innerHTML = "";
+
+            const licenseField = document.getElementById('generatedLicense');
+            if (licenseField) licenseField.value = "";
+
+            const alertContainer = document.getElementById('alertContainer');
+            if (alertContainer) alertContainer.innerHTML = "";
+
+            document.getElementById('decryptForm').reset();
         }
     </script>
 
